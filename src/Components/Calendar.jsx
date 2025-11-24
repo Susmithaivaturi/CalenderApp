@@ -1,10 +1,13 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X } from "lucide-react";
 import dayjs from "dayjs";
 
 export default function Calendar() {
   const [current, setCurrent] = useState(dayjs());
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [dir, setDir] = useState(0);
 
   const monthStart = useMemo(() => current.startOf("month"), [current]);
   const daysInMonth = useMemo(() => current.daysInMonth(), [current]);
@@ -20,11 +23,26 @@ export default function Calendar() {
     return map;
   }, [events]);
 
-  const handlePrev = useCallback(() => setCurrent((s) => s.subtract(1, "month")), []);
-  const handleNext = useCallback(() => setCurrent((s) => s.add(1, "month")), []);
-  const handlePrevYear = useCallback(() => setCurrent((s) => s.subtract(1, "year")), []);
-  const handleNextYear = useCallback(() => setCurrent((s) => s.add(1, "year")), []);
-  const handleToday = useCallback(() => setCurrent(dayjs()), []);
+  const handlePrev = useCallback(() => {
+    setCurrent((s) => s.subtract(1, "month"));
+    setDir(-1);
+  }, []);
+  const handleNext = useCallback(() => {
+    setCurrent((s) => s.add(1, "month"));
+    setDir(1);
+  }, []);
+  const handlePrevYear = useCallback(() => {
+    setCurrent((s) => s.subtract(1, "year"));
+    setDir(-1);
+  }, []);
+  const handleNextYear = useCallback(() => {
+    setCurrent((s) => s.add(1, "year"));
+    setDir(1);
+  }, []);
+  const handleToday = useCallback(() => {
+    setCurrent(dayjs());
+    setDir(0);
+  }, []);
 
   const formatTimeRange = (ev) => `${ev.startTime} - ${ev.endTime}`;
   const getDuration = (ev) => {
@@ -102,12 +120,22 @@ export default function Calendar() {
     return cells;
   };
 
+  const pageVariants = {
+    enter: (d) => ({ x: d > 0 ? 300 : -300, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (d) => ({ x: d > 0 ? -300 : 300, opacity: 0 })
+  };
+
   return (
     <div className="max-w-4xl w-full mx-auto mt-6 p-3 sm:p-5">
       <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
         <div className="flex gap-1 items-center">
-          <button onClick={handlePrevYear} className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300" aria-label="Previous year">«</button>
-          <button onClick={handlePrev} className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300" aria-label="Previous month">←</button>
+          <button onClick={handlePrevYear} className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300" aria-label="Previous year">
+            <ChevronsLeft size={16} />
+          </button>
+          <button onClick={handlePrev} className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300" aria-label="Previous month">
+            <ChevronLeft size={16} />
+          </button>
         </div>
 
         <div className="text-center w-full sm:w-auto">
@@ -116,8 +144,12 @@ export default function Calendar() {
         </div>
 
         <div className="flex gap-1 items-center">
-          <button onClick={handleNext} className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300" aria-label="Next month">→</button>
-          <button onClick={handleNextYear} className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300" aria-label="Next year">»</button>
+          <button onClick={handleNext} className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300" aria-label="Next month">
+            <ChevronRight size={16} />
+          </button>
+          <button onClick={handleNextYear} className="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300" aria-label="Next year">
+            <ChevronsRight size={16} />
+          </button>
         </div>
 
         <button onClick={handleToday} className="mt-2 sm:mt-0 px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200" aria-label="Today">Today</button>
@@ -133,9 +165,20 @@ export default function Calendar() {
         <div>Sat</div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 sm:gap-2">
-        {renderCells()}
-      </div>
+      <AnimatePresence initial={false} mode="wait">
+        <motion.div
+          key={current.format("YYYY-MM")}
+          custom={dir}
+          variants={pageVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ duration: 0.35 }}
+          className="grid grid-cols-7 gap-1 sm:gap-2"
+        >
+          {renderCells()}
+        </motion.div>
+      </AnimatePresence>
 
       {selectedEvent && (
         <div
@@ -169,7 +212,7 @@ export default function Calendar() {
                 onClick={() => setSelectedEvent(null)}
                 aria-label="Close"
               >
-                ✕
+                <X size={16} />
               </button>
             </div>
 

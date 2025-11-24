@@ -1,0 +1,29 @@
+[
+  {
+    "date": "2025-11-10",
+    "startTime": "00:00",
+    "endTime": "01:30",
+    "title": "Project Meeting",
+    "color": "#EF4444",
+    "attendees": ["Ram", "Krishna"],
+    "description": "Mini Project discussion with the team."
+  },
+  {
+    "date": "2025-11-10",
+    "startTime": "04:30",
+    "endTime": "07:30",
+    "title": "Study Time",
+    "color": "#10B981",
+    "attendees": ["Self"],
+    "description": "Study time for react.js"
+  },
+  {
+    "date": "2025-11-15",
+    "startTime": "10:00",
+    "endTime": "11:00",
+    "title": "Project Presentation",
+    "color": "#3B82F6",
+    "attendees": ["Team", "Mentor"],
+    "description": "Final presentation of the project on React.js."
+  }
+]
